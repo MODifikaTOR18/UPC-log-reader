@@ -11,6 +11,12 @@ from selenium.webdriver.support import expected_conditions
 with open('script_info.json', 'r') as file:
     settings = json.load(file)
 
+filterKeywords = []
+with open('log_filters.txt', 'r') as filter:
+    for line in filter:
+        item = line[:-1]
+        filterKeywords.append(item)
+
 host = settings['host']
 user = settings['login']
 secret = settings['secret']
@@ -64,8 +70,8 @@ for row in table_rows:
     log_time = datetime.datetime.strptime(log_time_str, '%d.%m.%Y %H:%M:%S')
     curr_time = (datetime.datetime.now() - datetime.timedelta(minutes=30))
 
-    # Если время не старше 5 минут, а текст лога не содержит инфы о входе/выходе, записываем строку
-    if curr_time < log_time and ('logged in' not in td[3].text and 'logged out' not in td[3].text):
+    # Если время не старше 5 минут, а текст лога не содержит инфы о входе/выходе, записываем строку td[3].text
+    if curr_time < log_time and not (any(elem in td[3].text for elem in filterKeywords)):
         message += f"{td[0].text} {td[1].text} {td[3].text}\n"
         written_rows += 1
 
@@ -76,7 +82,7 @@ if written_rows > 0:
     except Exception as e:
         print(e)
 
-print(message)
+# Разлогиниваемся из UPC
 logoff = browser.find_element(by=By.PARTIAL_LINK_TEXT, value="Log Off")
 logoff.click()
 browser.close()
