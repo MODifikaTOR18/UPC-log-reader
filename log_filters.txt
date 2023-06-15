@@ -2,3 +2,4 @@ logged in
 logged out
 Self-Test passed
 Self-Test started
+NTP update successful
